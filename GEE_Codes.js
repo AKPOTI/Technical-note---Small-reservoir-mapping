@@ -4,21 +4,15 @@ var region = ee.FeatureCollection('projects/ee-siabikebenezer/assets/ROI_Kom');
 Map.centerObject(region,7);
 Map.setOptions('satellite')
 
-
-
-
 var START_DATE = ee.Date('2019-11-01');
 var END_DATE = ee.Date('2019-11-30');
 var MAX_CLOUD_PROBABILITY = 30;
-
-
 
 function maskClouds(img) {
   var clouds = ee.Image(img.get('cloud_mask')).select('probability');
   var isNotCloud = clouds.lt(MAX_CLOUD_PROBABILITY);
   return img.updateMask(isNotCloud);
 }
-
 
 // The masks for the 10m bands sometimes do not exclude bad data at
 // scene edges, so we apply masks from the 20m and 60m bands as well.
@@ -29,7 +23,6 @@ function mask_Edges(Sent2_img) {
   return Sent2_img.updateMask(
       Sent2_img.select('B8A').mask().updateMask(Sent2_img.select('B9').mask()));
 }
-
 
 // import S2 SR and cloud probability datasets
 
@@ -59,12 +52,6 @@ var Sent2CloudMasked30 =
    
 // print(Sent2CloudMasked30)   
     
-
-
-
-
-
-
 
 
 // --------------------------------------------------------------------------------------------------------------
@@ -102,11 +89,6 @@ var rgbVis = {min: 0, max: 3000, bands: ['B4', 'B3', 'B2']};
 
 Map.addLayer(composite, rgbVis, 'S2 Image RGB');
 
-
-
-
-  
-
   
 //Develop RandomForest model
 //Generate training samples and predictors
@@ -129,7 +111,6 @@ var samples = image.sampleRegions({
     properties: ['water'],
     scale: 10 //make each sample the same size as landsat pixel
     }).randomColumn('random'); //creates a column with random numbers
-
 
 
 // split samples into training and testing using the random column created
@@ -184,9 +165,6 @@ var classMask = classifiedrf.select('classification').gt(0)
 var classed = classifiedrf.updateMask(countmask).updateMask(classMask);
 
 
-
-
-
 // Mask all permanent waters to display Small reservoir extent
 
 var SRE = classed
@@ -198,8 +176,6 @@ SRE = SRE.updateMask(mask)
 // Add the final result to the map
 
 Map.addLayer(SRE, {min: 1, max: 1, palette: 'red, red'}, 'Masked Small Reservoir extent');
-
-
 
 
 
